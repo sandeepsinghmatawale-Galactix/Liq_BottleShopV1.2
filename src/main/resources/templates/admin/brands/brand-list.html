@@ -1,71 +1,543 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Brand Management</title>
+    <title>Brand Management — BarInventory Admin</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --sb-w:    240px;
+            --tb-h:    56px;
+            --blue:    #3b6dea;
+            --blue-dk: #2a57cc;
+            --blue-lt: #eef2fd;
+            --blue-mid:#c7d4fa;
+            --green:   #16a34a;
+            --green-lt:#dcfce7;
+            --red:     #dc2626;
+            --red-lt:  #fee2e2;
+            --amber:   #d97706;
+            --amber-lt:#fef3c7;
+            --bg:      #f3f4f8;
+            --sur:     #ffffff;
+            --sur2:    #f9fafb;
+            --bdr:     #e5e7eb;
+            --bdr-dk:  #d1d5db;
+            --txt:     #111827;
+            --txt2:    #374151;
+            --txt3:    #6b7280;
+            --txt4:    #9ca3af;
+            --sb-bg:   #1e2433;
+            --r:       10px;
+            --r-sm:    6px;
+            --r-lg:    14px;
+        }
+
+        html { font-size: 14px; }
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+            background: var(--bg); color: var(--txt);
+            min-height: 100vh; display: flex;
+        }
+
+        /* ── SIDEBAR ──────────────────────────────────────── */
+        .sb {
+            width: var(--sb-w); background: var(--sb-bg);
+            min-height: 100vh; position: fixed; left: 0; top: 0;
+            display: flex; flex-direction: column; z-index: 100;
+        }
+        .sb-logo {
+            padding: 0 20px; height: var(--tb-h);
+            display: flex; align-items: center; gap: 10px;
+            border-bottom: 1px solid rgba(255,255,255,.06);
+        }
+        .sb-ico  { width:30px;height:30px;background:var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px; }
+        .sb-name { font-size:13.5px;font-weight:700;color:#fff; }
+        .sb-tag  { font-size:9px;background:rgba(59,109,234,.3);color:#93b4f8;padding:1px 6px;border-radius:20px;font-weight:600;letter-spacing:.04em;margin-left:auto; }
+
+        .sb-nav { flex:1;padding:12px 10px;overflow-y:auto; }
+        .sb-grp { margin-bottom:20px; }
+        .sb-grp-lbl { font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#475569;padding:0 10px 6px; }
+        .sb-lnk {
+            display:flex;align-items:center;gap:9px;padding:8px 10px;
+            border-radius:var(--r-sm);color:#94a3b8;font-size:13px;font-weight:500;
+            text-decoration:none;transition:all .15s;margin-bottom:1px;
+        }
+        .sb-lnk:hover { background:rgba(255,255,255,.05);color:#cbd5e1; }
+        .sb-lnk.on    { background:rgba(59,109,234,.15);color:#93b4f8; }
+        .sb-lnk-ico   { font-size:15px;width:18px;text-align:center;flex-shrink:0; }
+        .sb-cnt        { margin-left:auto;background:var(--blue);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px; }
+
+        .sb-foot { padding:14px 16px;border-top:1px solid rgba(255,255,255,.06); }
+        .sb-usr  { display:flex;align-items:center;gap:9px; }
+        .sb-av   { width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--blue),#4f46e5);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff; }
+        .sb-un   { font-size:12px;font-weight:600;color:#e2e8f0; }
+        .sb-ur   { font-size:10px;color:#64748b; }
+
+        /* ── MAIN ─────────────────────────────────────────── */
+        .main { margin-left:var(--sb-w);flex:1;display:flex;flex-direction:column; }
+
+        .topbar {
+            height:var(--tb-h);background:var(--sur);border-bottom:1px solid var(--bdr);
+            display:flex;align-items:center;padding:0 28px;gap:12px;
+            position:sticky;top:0;z-index:50;
+        }
+        .tb-title { font-size:15px;font-weight:700;color:var(--txt); }
+        .tb-right { margin-left:auto;display:flex;gap:8px;align-items:center; }
+        .tb-btn { width:32px;height:32px;border:1px solid var(--bdr);background:var(--sur);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;color:var(--txt3);transition:all .15s; }
+        .tb-btn:hover { background:var(--bg);color:var(--txt); }
+
+        /* ── CONTENT ──────────────────────────────────────── */
+        .content { padding: 28px; }
+
+        /* ── FLASH ────────────────────────────────────────── */
+        .flash {
+            display:flex;align-items:flex-start;gap:10px;padding:12px 14px;
+            border-radius:var(--r-sm);margin-bottom:20px;font-size:13px;
+            animation:adn .25s ease;
+        }
+        @keyframes adn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:none} }
+        .f-err { background:var(--red-lt);border:1px solid #fca5a5;color:#991b1b; }
+        .f-ok  { background:var(--green-lt);border:1px solid #86efac;color:#15803d; }
+
+        /* ── PAGE HEADER ──────────────────────────────────── */
+        .pg-head {
+            display:flex;align-items:center;justify-content:space-between;
+            margin-bottom:20px;
+        }
+        .pg-title { font-size:20px;font-weight:700;color:var(--txt); }
+        .pg-desc  { font-size:13px;color:var(--txt3);margin-top:3px; }
+
+        /* ── STATS ROW ────────────────────────────────────── */
+        .stats { display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap; }
+        .stat-card {
+            background:var(--sur);border:1px solid var(--bdr);
+            border-radius:var(--r-lg);padding:14px 18px;
+            display:flex;align-items:center;gap:12px;
+            min-width:160px;flex:1;
+            box-shadow:0 1px 3px rgba(0,0,0,.05);
+        }
+        .stat-ico { width:36px;height:36px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0; }
+        .stat-ico.blue   { background:var(--blue-lt); }
+        .stat-ico.green  { background:var(--green-lt); }
+        .stat-ico.amber  { background:var(--amber-lt); }
+        .stat-num  { font-size:20px;font-weight:700;color:var(--txt);line-height:1; }
+        .stat-lbl  { font-size:11px;color:var(--txt3);margin-top:2px; }
+
+        /* ── TOOLBAR ──────────────────────────────────────── */
+        .toolbar {
+            display:flex;align-items:center;gap:10px;
+            padding:12px 16px;background:var(--sur);
+            border:1px solid var(--bdr);border-radius:var(--r-lg) var(--r-lg) 0 0;
+            border-bottom:none;
+        }
+        .search-wrap { position:relative;flex:1;max-width:280px; }
+        .search-ico  { position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--txt4);font-size:13px;pointer-events:none; }
+        .search-inp  {
+            width:100%;height:34px;background:var(--sur2);border:1px solid var(--bdr-dk);
+            border-radius:var(--r-sm);font-family:'Plus Jakarta Sans',system-ui,sans-serif;
+            font-size:13px;padding:0 10px 0 30px;outline:none;color:var(--txt);transition:all .15s;
+        }
+        .search-inp:focus { border-color:var(--blue);background:var(--sur);box-shadow:0 0 0 3px rgba(59,109,234,.1); }
+        .search-inp::placeholder { color:var(--txt4); }
+
+        .filter-sel {
+            height:34px;background:var(--sur2);border:1px solid var(--bdr-dk);
+            border-radius:var(--r-sm);font-family:'Plus Jakarta Sans',system-ui,sans-serif;
+            font-size:13px;padding:0 28px 0 10px;outline:none;color:var(--txt);
+            appearance:none;-webkit-appearance:none;cursor:pointer;
+            background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat:no-repeat;background-position:right 8px center;
+            transition:all .15s;
+        }
+        .filter-sel:focus { border-color:var(--blue);box-shadow:0 0 0 3px rgba(59,109,234,.1); }
+
+        .toolbar-right { margin-left:auto; }
+
+        /* ── TABLE ────────────────────────────────────────── */
+        .tbl-wrap {
+            background:var(--sur);border:1px solid var(--bdr);
+            border-radius:0 0 var(--r-lg) var(--r-lg);
+            overflow:hidden;
+        }
+
+        table { width:100%;border-collapse:collapse; }
+
+        thead th {
+            background:var(--sur2);padding:10px 16px;
+            text-align:left;font-size:11px;font-weight:700;
+            text-transform:uppercase;letter-spacing:.07em;color:var(--txt3);
+            border-bottom:1px solid var(--bdr);white-space:nowrap;
+        }
+
+        tbody tr { border-bottom:1px solid var(--bdr);transition:background .1s; }
+        tbody tr:last-child { border-bottom:none; }
+        tbody tr:hover { background:#fafbff; }
+
+        td { padding:11px 16px;font-size:13px;color:var(--txt2);vertical-align:middle; }
+
+        .brand-name { font-weight:600;color:var(--txt); }
+
+        /* Category badge */
+        .cat-badge {
+            display:inline-flex;align-items:center;gap:4px;
+            font-size:11px;font-weight:600;padding:3px 8px;
+            border-radius:20px;background:var(--sur2);border:1px solid var(--bdr-dk);
+            color:var(--txt2);
+        }
+
+        /* Status badge */
+        .status {
+            display:inline-flex;align-items:center;gap:5px;
+            font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:20px;
+        }
+        .status::before { content:'';width:6px;height:6px;border-radius:50%;flex-shrink:0; }
+        .status.active   { background:var(--green-lt);color:var(--green); }
+        .status.active::before { background:var(--green); }
+        .status.inactive { background:var(--sur2);color:var(--txt3); }
+        .status.inactive::before { background:var(--txt4); }
+
+        /* Sizes count pill */
+        .sz-pill {
+            display:inline-flex;align-items:center;gap:3px;
+            font-size:11px;font-weight:600;
+            background:var(--blue-lt);color:var(--blue-dk);
+            border:1px solid var(--blue-mid);padding:2px 7px;border-radius:20px;
+        }
+
+        /* Action buttons */
+        .actions { display:flex;align-items:center;gap:6px;flex-wrap:nowrap; }
+
+        .btn {
+            display:inline-flex;align-items:center;gap:5px;
+            font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-weight:600;
+            border:none;border-radius:var(--r-sm);cursor:pointer;
+            transition:all .15s;text-decoration:none;white-space:nowrap;line-height:1;
+        }
+        .btn-p  { background:var(--blue);color:#fff;font-size:13px;padding:0 16px;height:34px;box-shadow:0 1px 3px rgba(59,109,234,.3); }
+        .btn-p:hover { background:var(--blue-dk); }
+        .btn-edit {
+            background:var(--amber-lt);color:var(--amber);
+            border:1px solid #fde68a;font-size:12px;
+            padding:0 10px;height:28px;
+        }
+        .btn-edit:hover { background:#fef3c7;border-color:#f59e0b; }
+
+        .btn-del {
+            background:var(--red-lt);color:var(--red);
+            border:1px solid #fca5a5;font-size:12px;
+            padding:0 10px;height:28px;
+        }
+        .btn-del:hover { background:#fee2e2;border-color:#f87171; }
+
+        /* Empty state */
+        .empty-row td {
+            text-align:center;padding:48px 20px;color:var(--txt3);
+        }
+        .empty-ico-wrap {
+            display:flex;flex-direction:column;align-items:center;gap:8px;
+        }
+        .empty-ico { font-size:28px;opacity:.4; }
+        .empty-t   { font-size:14px;font-weight:600;color:var(--txt2); }
+        .empty-d   { font-size:13px;color:var(--txt3); }
+
+        /* Pagination area */
+        .tbl-footer {
+            display:flex;align-items:center;justify-content:space-between;
+            padding:12px 16px;background:var(--sur2);border-top:1px solid var(--bdr);
+            font-size:12px;color:var(--txt3);
+        }
+
+        @media (max-width:960px) {
+            .sb { transform:translateX(-100%); }
+            .main { margin-left:0; }
+            .content { padding:16px; }
+            .stats { display:none; }
+        }
+
+        .fi  { animation:fup .4s ease both; }
+        .fi2 { animation:fup .4s .08s ease both; }
+        .fi3 { animation:fup .4s .15s ease both; }
+        @keyframes fup { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+    </style>
 </head>
-<body class="bg-light">
+<body>
 
-<div class="container py-5">
-
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold">Brand Management</h2>
-        <a th:href="@{/admin/brands/new}" class="btn btn-primary">
-            + Add New Brand
-        </a>
+<!-- SIDEBAR -->
+<aside class="sb">
+    <div class="sb-logo">
+        <div class="sb-ico">🍶</div>
+        <span class="sb-name">BarInventory</span>
+        <span class="sb-tag">ADMIN</span>
     </div>
-
-    <div class="card shadow-sm">
-        <div class="card-body">
-
-            <table class="table table-hover align-middle">
-                <thead class="table-dark">
-                <tr>
-                    <th>Name</th>
-                    <th>Category</th>
-                    <th>Status</th>
-                    <th width="220">Actions</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="brand : ${brands}">
-                    <td th:text="${brand.name}"></td>
-                    <td th:text="${brand.category}"></td>
-                    <td>
-                        <span class="badge bg-success" th:if="${brand.active}">Active</span>
-                        <span class="badge bg-secondary" th:unless="${brand.active}">Inactive</span>
-                    </td>
-                    <td>
-                        <a th:href="@{'/admin/brands/' + ${brand.id} + '/edit'}"
-                           class="btn btn-sm btn-warning">Edit</a>
-
-                        <a th:href="@{'/admin/brands/' + ${brand.id} + '/sizes'}"
-                           class="btn btn-sm btn-info text-white">Sizes</a>
-
-                        <form th:action="@{'/admin/brands/' + ${brand.id} + '/delete'}"
-                              method="post"
-                              class="d-inline">
-                            <button class="btn btn-sm btn-danger"
-                                    onclick="return confirm('Deactivate this brand?')">
-                                Delete
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-
-                <tr th:if="${#lists.isEmpty(brands)}">
-                    <td colspan="4" class="text-center text-muted py-4">
-                        No brands found.
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-
+    <nav class="sb-nav">
+        <div class="sb-grp">
+            <div class="sb-grp-lbl">Overview</div>
+            <a href="#" class="sb-lnk"><span class="sb-lnk-ico">▣</span> Dashboard</a>
+            <a href="#" class="sb-lnk"><span class="sb-lnk-ico">📊</span> Reports</a>
+        </div>
+        <div class="sb-grp">
+            <div class="sb-grp-lbl">Inventory</div>
+            <a href="#" class="sb-lnk on"><span class="sb-lnk-ico">🏷</span> Brands
+                <span class="sb-cnt" th:text="${brands.size()}">0</span>
+            </a>
+            <a href="#" class="sb-lnk"><span class="sb-lnk-ico">📦</span> Stock</a>
+            <a href="#" class="sb-lnk"><span class="sb-lnk-ico">📥</span> Purchases</a>
+            <a href="#" class="sb-lnk"><span class="sb-lnk-ico">📤</span> Sales</a>
+        </div>
+        <div class="sb-grp">
+            <div class="sb-grp-lbl">Management</div>
+            <a href="#" class="sb-lnk"><span class="sb-lnk-ico">🏪</span> Suppliers</a>
+            <a href="#" class="sb-lnk"><span class="sb-lnk-ico">👥</span> Users</a>
+            <a href="#" class="sb-lnk"><span class="sb-lnk-ico">⚙</span> Settings</a>
+        </div>
+    </nav>
+    <div class="sb-foot">
+        <div class="sb-usr">
+            <div class="sb-av">AD</div>
+            <div><div class="sb-un">Admin</div><div class="sb-ur">Administrator</div></div>
         </div>
     </div>
+</aside>
 
-</div>
+<!-- MAIN -->
+<div class="main">
+
+    <header class="topbar">
+        <span class="tb-title">Brand Management</span>
+        <div class="tb-right">
+            <button class="tb-btn" title="Notifications">🔔</button>
+            <button class="tb-btn" title="Help">?</button>
+        </div>
+    </header>
+
+    <div class="content">
+
+        <!-- Flash messages -->
+        <div th:if="${errorMsg}"   class="flash f-err fi"><span>⚠</span><span th:text="${errorMsg}"></span></div>
+        <div th:if="${successMsg}" class="flash f-ok  fi"><span>✓</span><span th:text="${successMsg}"></span></div>
+
+        <!-- Page header -->
+        <div class="pg-head fi">
+            <div>
+                <h1 class="pg-title">Brands</h1>
+                <p class="pg-desc">Manage liquor brands, categories and size/pricing configurations.</p>
+            </div>
+            <!--
+                Single entry point: goes straight to brand-create.html
+                which handles brand info + all sizes in one form.
+                The old separate "Sizes" page is no longer needed.
+            -->
+            <a th:href="@{/admin/brands/create}" class="btn btn-p">
+                + Add New Brand
+            </a>
+        </div>
+
+        <!-- Stats row -->
+        <div class="stats fi2">
+            <div class="stat-card">
+                <div class="stat-ico blue">🏷</div>
+                <div>
+                    <div class="stat-num" th:text="${brands.size()}">0</div>
+                    <div class="stat-lbl">Total Brands</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-ico green">✅</div>
+                <div>
+                    <div class="stat-num"
+                         th:text="${brands.stream().filter(b -> b.active).count()}">0</div>
+                    <div class="stat-lbl">Active Brands</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-ico amber">📐</div>
+                <div>
+                    <div class="stat-num"
+                         th:text="${brands.stream().mapToLong(b -> b.sizes.size()).sum()}">0</div>
+                    <div class="stat-lbl">Total SKUs</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="fi3">
+
+            <!-- Toolbar -->
+            <div class="toolbar">
+                <div class="search-wrap">
+                    <span class="search-ico">🔍</span>
+                    <input type="text"
+                           class="search-inp"
+                           id="searchBox"
+                           placeholder="Search brands…"
+                           oninput="filterTable()">
+                </div>
+                <select class="filter-sel" id="catFilter" onchange="filterTable()">
+                    <option value="">All Categories</option>
+                    <option value="WHISKY">🥃 Whisky</option>
+                    <option value="BEER">🍺 Beer</option>
+                    <option value="VODKA">🍸 Vodka</option>
+                    <option value="RUM">🍹 Rum</option>
+                    <option value="WINE">🍷 Wine</option>
+                    <option value="GIN">🌿 Gin</option>
+                    <option value="BRANDY">🥂 Brandy</option>
+                    <option value="TEQUILA">🌵 Tequila</option>
+                    <option value="OTHER">🍶 Other</option>
+                </select>
+                <select class="filter-sel" id="statusFilter" onchange="filterTable()">
+                    <option value="">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                </select>
+                <div class="toolbar-right">
+                    <span id="rowCount" style="font-size:12px;color:var(--txt3)"></span>
+                </div>
+            </div>
+
+            <div class="tbl-wrap">
+                <table id="brandTable">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Brand Name</th>
+                        <th>Category</th>
+                        <th>Sizes / SKUs</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody id="tblBody">
+                    <tr th:each="brand, stat : ${brands}"
+                        th:attr="data-name=${brand.name},
+                                 data-cat=${brand.category},
+                                 data-status=${brand.active ? 'active' : 'inactive'}">
+                        <td th:text="${stat.count}"
+                            style="color:var(--txt4);font-size:12px;font-weight:600"></td>
+
+                        <td>
+                            <div class="brand-name" th:text="${brand.name}"></div>
+                            <div style="font-size:11px;color:var(--txt3);margin-top:2px"
+                                 th:text="${brand.parentCompany != null && !brand.parentCompany.isEmpty()
+                                            ? brand.parentCompany : ''}">
+                            </div>
+                        </td>
+
+                        <td>
+                            <span class="cat-badge">
+                                <span th:text="${brand.category.name()=='WHISKY' ?'🥃':
+                                                brand.category.name()=='BEER'   ?'🍺':
+                                                brand.category.name()=='VODKA'  ?'🍸':
+                                                brand.category.name()=='RUM'    ?'🍹':
+                                                brand.category.name()=='WINE'   ?'🍷':
+                                                brand.category.name()=='GIN'    ?'🌿':
+                                                brand.category.name()=='BRANDY' ?'🥂':
+                                                brand.category.name()=='TEQUILA'?'🌵':'🍶'}">
+                                </span>
+                                <span th:text="${brand.category}"></span>
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="sz-pill"
+                                  th:text="${brand.sizes.size() + ' size' + (brand.sizes.size() != 1 ? 's' : '')}">
+                            </span>
+                        </td>
+
+                        <td>
+                            <span th:class="${brand.active ? 'status active' : 'status inactive'}"
+                                  th:text="${brand.active ? 'Active' : 'Inactive'}">
+                            </span>
+                        </td>
+
+                        <td>
+                            <div class="actions">
+                                <!--
+                                    Edit goes to brand-create.html in EDIT mode
+                                    (same single-page form, pre-populated with existing data)
+                                -->
+                                <a th:href="@{'/admin/brands/' + ${brand.id} + '/edit'}"
+                                   class="btn btn-edit">
+                                    ✏ Edit
+                                </a>
+
+                                <!--
+                                    Deactivate brand — confirm before submit
+                                -->
+                                <form th:action="@{'/admin/brands/' + ${brand.id} + '/delete'}"
+                                      method="post"
+                                      style="display:inline"
+                                      onsubmit="return confirm('Deactivate this brand?')">
+                                    <button type="submit" class="btn btn-del">
+                                        🗑 Deactivate
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Empty state row -->
+                    <tr class="empty-row" th:if="${#lists.isEmpty(brands)}">
+                        <td colspan="6">
+                            <div class="empty-ico-wrap">
+                                <div class="empty-ico">🍾</div>
+                                <div class="empty-t">No brands found</div>
+                                <div class="empty-d">Click "+ Add New Brand" to get started</div>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <div class="tbl-footer">
+                    <span id="footerCount"></span>
+                    <span style="font-size:11px;color:var(--txt4)">
+                        Showing active brands only · <a th:href="@{/admin/brands/create}" style="color:var(--blue);text-decoration:none;font-weight:600">+ Add New Brand</a>
+                    </span>
+                </div>
+            </div>
+
+        </div><!-- /fi3 -->
+    </div><!-- /content -->
+</div><!-- /main -->
+
+<script>
+    function filterTable() {
+        const q      = document.getElementById('searchBox').value.toLowerCase();
+        const cat    = document.getElementById('catFilter').value;
+        const status = document.getElementById('statusFilter').value;
+        const rows   = document.querySelectorAll('#tblBody tr:not(.empty-row)');
+        let visible  = 0;
+
+        rows.forEach(row => {
+            const name   = (row.dataset.name   || '').toLowerCase();
+            const rCat   = (row.dataset.cat    || '');
+            const rSt    = (row.dataset.status || '');
+
+            const matchQ  = !q      || name.includes(q);
+            const matchC  = !cat    || rCat === cat;
+            const matchS  = !status || rSt  === status;
+
+            if (matchQ && matchC && matchS) {
+                row.style.display = '';
+                visible++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        const total = rows.length;
+        document.getElementById('rowCount').textContent =
+            visible === total ? `${total} brand${total !== 1 ? 's' : ''}` : `${visible} of ${total}`;
+        document.getElementById('footerCount').textContent =
+            `${visible} brand${visible !== 1 ? 's' : ''} shown`;
+    }
+
+    // Init count
+    filterTable();
+</script>
 </body>
 </html>

@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Brand — BarInventory Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ─── CSS RESET & TOKENS ──────────────────────────────────────── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --sidebar-w:      240px;
+            --topbar-h:       56px;
+
+            /* Palette */
+            --blue:           #3b6dea;
+            --blue-dark:      #2a57cc;
+            --blue-light:     #eef2fd;
+            --blue-mid:       #c7d4fa;
+            --indigo:         #4f46e5;
+            --green:          #16a34a;
+            --green-light:    #dcfce7;
+            --red:            #dc2626;
+            --red-light:      #fee2e2;
+            --amber:          #d97706;
+            --amber-light:    #fef3c7;
+
+            /* Neutrals */
+            --bg:             #f3f4f8;
+            --surface:        #ffffff;
+            --surface-2:      #f9fafb;
+            --border:         #e5e7eb;
+            --border-dark:    #d1d5db;
+            --text:           #111827;
+            --text-2:         #374151;
+            --text-3:         #6b7280;
+            --text-4:         #9ca3af;
+
+            /* Sidebar */
+            --sb-bg:          #1e2433;
+            --sb-text:        #94a3b8;
+            --sb-active-bg:   rgba(59,109,234,0.15);
+            --sb-active-text: #93b4f8;
+            --sb-hover-bg:    rgba(255,255,255,0.05);
+
+            --radius:         10px;
+            --radius-sm:      6px;
+            --radius-lg:      14px;
+            --shadow-sm:      0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+            --shadow:         0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg:      0 8px 24px rgba(0,0,0,0.1);
+        }
+
+        html { font-size: 14px; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* ─── SIDEBAR ─────────────────────────────────────────────────── */
+        .sidebar {
+            width: var(--sidebar-w);
+            background: var(--sb-bg);
+            min-height: 100vh;
+            position: fixed;
+            left: 0; top: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .sb-logo {
+            padding: 0 20px;
+            height: var(--topbar-h);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            flex-shrink: 0;
+        }
+
+        .sb-logo-icon {
+            width: 30px; height: 30px;
+            background: var(--blue);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 15px;
+        }
+
+        .sb-logo-name {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 0.01em;
+        }
+
+        .sb-logo-badge {
+            font-size: 9px;
+            background: rgba(59,109,234,0.3);
+            color: var(--sb-active-text);
+            padding: 1px 6px;
+            border-radius: 20px;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            margin-left: auto;
+        }
+
+        .sb-nav {
+            flex: 1;
+            padding: 12px 10px;
+            overflow-y: auto;
+        }
+
+        .sb-section {
+            margin-bottom: 20px;
+        }
+
+        .sb-section-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #475569;
+            padding: 0 10px 6px;
+        }
+
+        .sb-item {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 8px 10px;
+            border-radius: var(--radius-sm);
+            color: var(--sb-text);
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.15s;
+            margin-bottom: 1px;
+        }
+
+        .sb-item:hover { background: var(--sb-hover-bg); color: #cbd5e1; }
+
+        .sb-item.active {
+            background: var(--sb-active-bg);
+            color: var(--sb-active-text);
+        }
+
+        .sb-item.active .sb-icon { color: var(--blue); }
+
+        .sb-icon {
+            font-size: 15px;
+            width: 18px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .sb-badge {
+            margin-left: auto;
+            background: var(--blue);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 20px;
+        }
+
+        .sb-footer {
+            padding: 14px 16px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .sb-user {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+        }
+
+        .sb-avatar {
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--blue), var(--indigo));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .sb-user-name  { font-size: 12px; font-weight: 600; color: #e2e8f0; }
+        .sb-user-role  { font-size: 10px; color: #64748b; }
+
+        /* ─── MAIN SHELL ──────────────────────────────────────────────── */
+        .main {
+            margin-left: var(--sidebar-w);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* ─── TOP BAR ─────────────────────────────────────────────────── */
+        .topbar {
+            height: var(--topbar-h);
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 28px;
+            gap: 12px;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .topbar-breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: var(--text-3);
+        }
+
+        .topbar-breadcrumb a {
+            color: var(--text-3);
+            text-decoration: none;
+            transition: color 0.15s;
+        }
+        .topbar-breadcrumb a:hover { color: var(--blue); }
+        .topbar-breadcrumb .sep { color: var(--text-4); font-size: 12px; }
+        .topbar-breadcrumb .cur { color: var(--text); font-weight: 600; }
+
+        .topbar-actions {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tb-icon-btn {
+            width: 32px; height: 32px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: var(--radius-sm);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.15s;
+            color: var(--text-3);
+        }
+        .tb-icon-btn:hover { background: var(--bg); border-color: var(--border-dark); color: var(--text); }
+
+        /* ─── PAGE CONTENT ────────────────────────────────────────────── */
+        .content {
+            flex: 1;
+            padding: 28px;
+            max-width: 1120px;
+            width: 100%;
+        }
+
+        /* ─── PAGE HEADER ─────────────────────────────────────────────── */
+        .page-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .page-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.2;
+        }
+
+        .page-desc {
+            font-size: 13px;
+            color: var(--text-3);
+            margin-top: 4px;
+        }
+
+        /* ─── ALERTS ──────────────────────────────────────────────────── */
+        .alert {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 12px 14px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 20px;
+            font-size: 13px;
+            animation: adown 0.25s ease;
+        }
+
+        @keyframes adown { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:none; } }
+
+        .alert-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+        .alert-msg  { line-height: 1.5; }
+
+        .alert-error   { background: var(--red-light);   border: 1px solid #fca5a5; color: #991b1b; }
+        .alert-success { background: var(--green-light);  border: 1px solid #86efac; color: #15803d; }
+
+        /* ─── LAYOUT GRID ─────────────────────────────────────────────── */
+        .form-layout {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        /* ─── CARD ────────────────────────────────────────────────────── */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .card-head {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-head-icon {
+            width: 28px; height: 28px;
+            background: var(--blue-light);
+            border-radius: var(--radius-sm);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px;
+            color: var(--blue);
+        }
+
+        .card-title {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .card-body { padding: 20px; }
+
+        /* ─── FORM ELEMENTS ───────────────────────────────────────────── */
+        .field-group { margin-bottom: 16px; }
+        .field-group:last-child { margin-bottom: 0; }
+
+        .field-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-2);
+            margin-bottom: 6px;
+            letter-spacing: 0.01em;
+        }
+
+        .field-label .req {
+            color: var(--red);
+            margin-left: 2px;
+        }
+
+        .field-hint {
+            font-size: 11px;
+            color: var(--text-4);
+            margin-top: 4px;
+        }
+
+        .input, .select {
+            width: 100%;
+            height: 36px;
+            background: var(--surface);
+            border: 1px solid var(--border-dark);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+            font-size: 13px;
+            padding: 0 10px;
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+        .input:hover, .select:hover {
+            border-color: #9ca3af;
+        }
+
+        .input:focus, .select:focus {
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px rgba(59,109,234,0.12);
+        }
+
+        .input::placeholder { color: var(--text-4); }
+
+        .input.invalid, .select.invalid {
+            border-color: var(--red);
+            box-shadow: 0 0 0 3px rgba(220,38,38,0.08);
+        }
+
+        .select {
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            padding-right: 30px;
+            cursor: pointer;
+        }
+
+        .select option { color: var(--text); background: var(--surface); }
+
+        .field-error {
+            font-size: 11.5px;
+            color: var(--red);
+            margin-top: 4px;
+            display: none;
+        }
+
+        .field-error.show { display: block; }
+
+        /* ─── INLINE LABEL + INPUT ROW ────────────────────────────────── */
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        /* ─── STATUS TOGGLE ───────────────────────────────────────────── */
+        .status-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+        }
+
+        .st-info { display: flex; flex-direction: column; gap: 2px; }
+        .st-label { font-size: 12.5px; font-weight: 600; color: var(--text); }
+        .st-hint  { font-size: 11px; color: var(--text-3); }
+
+        /* Toggle switch */
+        .sw { position: relative; width: 36px; height: 20px; flex-shrink: 0; }
+        .sw input { display: none; }
+        .sw-track {
+            position: absolute; inset: 0;
+            background: var(--border-dark);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .sw-track::after {
+            content: '';
+            position: absolute;
+            top: 3px; left: 3px;
+            width: 14px; height: 14px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+        }
+        .sw input:checked + .sw-track { background: var(--blue); }
+        .sw input:checked + .sw-track::after { transform: translateX(16px); }
+
+        /* ─── CATEGORY BUTTONS ────────────────────────────────────────── */
+        .cat-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+        }
+
+        .cat-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 10px 4px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--surface);
+            cursor: pointer;
+            transition: all 0.15s;
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+        }
+
+        .cat-btn:hover {
+            border-color: var(--blue-mid);
+            background: var(--blue-light);
+        }
+
+        .cat-btn.active {
+            border-color: var(--blue);
+            background: var(--blue-light);
+            box-shadow: 0 0 0 2px rgba(59,109,234,0.15);
+        }
+
+        .cat-btn .emoji { font-size: 18px; line-height: 1; }
+        .cat-btn .name  { font-size: 10px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.04em; }
+        .cat-btn.active .name { color: var(--blue); }
+
+        .cat-radio { display: none; }
+
+        /* ─── BRAND PREVIEW PILL ──────────────────────────────────────── */
+        #brand-preview {
+            display: none;
+            padding: 12px 14px;
+            background: linear-gradient(135deg, var(--blue-light), #f0f4ff);
+            border: 1px solid var(--blue-mid);
+            border-radius: var(--radius-sm);
+            margin-top: 16px;
+            animation: adown 0.2s ease;
+        }
+
+        .bp-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--blue); margin-bottom: 6px; }
+        .bp-name  { font-size: 16px; font-weight: 700; color: var(--text); }
+        .bp-meta  { font-size: 11.5px; color: var(--text-3); margin-top: 2px; }
+
+        .bp-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+        .bp-chip {
+            font-size: 11px; font-weight: 600;
+            padding: 2px 8px;
+            background: var(--surface);
+            border: 1px solid var(--blue-mid);
+            border-radius: 20px;
+            color: var(--blue-dark);
+        }
+
+        /* ─── SIZES PANEL ─────────────────────────────────────────────── */
+        .sizes-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sizes-top-left { display: flex; align-items: center; gap: 10px; }
+
+        .count-badge {
+            display: inline-flex;
+            align-items: center;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--blue-dark);
+            background: var(--blue-light);
+            border: 1px solid var(--blue-mid);
+            padding: 2px 8px;
+            border-radius: 20px;
+        }
+
+        .sizes-top-right { display: flex; gap: 8px; align-items: center; }
+
+        /* ─── QUICK CHIPS ─────────────────────────────────────────────── */
+        .quick-row {
+            padding: 10px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            background: var(--surface-2);
+        }
+
+        .quick-lbl { font-size: 11px; font-weight: 600; color: var(--text-3); white-space: nowrap; }
+
+        .qc {
+            font-size: 11.5px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border: 1px solid var(--border-dark);
+            border-radius: 20px;
+            background: var(--surface);
+            color: var(--text-2);
+            cursor: pointer;
+            transition: all 0.15s;
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+        }
+
+        .qc:hover {
+            border-color: var(--blue);
+            background: var(--blue-light);
+            color: var(--blue-dark);
+        }
+
+        /* ─── TABLE HEADER ────────────────────────────────────────────── */
+        .tbl-head {
+            display: grid;
+            grid-template-columns: 32px 1fr 130px 115px 82px 70px 36px;
+            gap: 8px;
+            padding: 8px 20px;
+            background: var(--surface-2);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .th {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: var(--text-3);
+        }
+
+        /* ─── SIZE ROWS ───────────────────────────────────────────────── */
+        .srows { min-height: 60px; }
+
+        .srow {
+            display: grid;
+            grid-template-columns: 32px 1fr 130px 115px 82px 70px 36px;
+            gap: 8px;
+            align-items: center;
+            padding: 8px 20px;
+            border-bottom: 1px solid var(--border);
+            transition: background 0.12s;
+            animation: rowin 0.2s ease both;
+        }
+
+        @keyframes rowin { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:none; } }
+
+        .srow:hover { background: #fafbff; }
+        .srow:last-child { border-bottom: none; }
+
+        .rn {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-4);
+            text-align: center;
+        }
+
+        /* Compact inputs for table rows */
+        .ti, .ts {
+            width: 100%;
+            height: 32px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+            font-size: 12.5px;
+            padding: 0 8px;
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+        .ti:focus, .ts:focus {
+            border-color: var(--blue);
+            box-shadow: 0 0 0 2.5px rgba(59,109,234,0.1);
+        }
+
+        .ti:hover, .ts:hover { border-color: var(--border-dark); }
+        .ti::placeholder { color: var(--text-4); font-size: 12px; }
+
+        .ts {
+            appearance: none; -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 7px center;
+            padding-right: 24px;
+            cursor: pointer;
+        }
+
+        .ts option { background: var(--surface); }
+
+        .del-row {
+            width: 28px; height: 28px;
+            background: none;
+            border: 1px solid transparent;
+            border-radius: var(--radius-sm);
+            color: var(--text-4);
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px;
+            transition: all 0.15s;
+            margin: 0 auto;
+        }
+
+        .del-row:hover {
+            background: var(--red-light);
+            border-color: #fca5a5;
+            color: var(--red);
+        }
+
+        /* ─── EMPTY STATE ─────────────────────────────────────────────── */
+        .empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .empty-icon {
+            width: 48px; height: 48px;
+            background: var(--blue-light);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px;
+            margin-bottom: 4px;
+        }
+
+        .empty-title { font-size: 13.5px; font-weight: 600; color: var(--text-2); }
+        .empty-desc  { font-size: 12.5px; color: var(--text-3); }
+
+        /* ─── BUTTONS ─────────────────────────────────────────────────── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+            font-weight: 600;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.15s;
+            text-decoration: none;
+            white-space: nowrap;
+            line-height: 1;
+        }
+
+        .btn-primary {
+            background: var(--blue);
+            color: #fff;
+            font-size: 13px;
+            padding: 8px 16px;
+            height: 34px;
+            box-shadow: 0 1px 3px rgba(59,109,234,0.3);
+        }
+        .btn-primary:hover { background: var(--blue-dark); box-shadow: 0 4px 10px rgba(59,109,234,0.3); }
+        .btn-primary:active { transform: translateY(1px); }
+
+        .btn-primary-lg {
+            height: 38px;
+            font-size: 13.5px;
+            padding: 0 22px;
+        }
+
+        .btn-secondary {
+            background: var(--surface);
+            color: var(--text-2);
+            font-size: 13px;
+            padding: 0 14px;
+            height: 34px;
+            border: 1px solid var(--border-dark);
+        }
+        .btn-secondary:hover { background: var(--surface-2); border-color: #9ca3af; }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--blue);
+            font-size: 13px;
+            padding: 0 14px;
+            height: 34px;
+            border: 1.5px solid var(--blue-mid);
+        }
+        .btn-outline:hover { background: var(--blue-light); border-color: var(--blue); }
+
+        .btn-danger-ghost {
+            background: transparent;
+            color: var(--text-3);
+            font-size: 12.5px;
+            padding: 0 12px;
+            height: 30px;
+            border: 1px solid var(--border);
+        }
+        .btn-danger-ghost:hover { background: var(--red-light); color: var(--red); border-color: #fca5a5; }
+
+        .btn-icon {
+            width: 34px; height: 34px;
+            padding: 0;
+            justify-content: center;
+        }
+
+        /* ─── FOOTER BAR ──────────────────────────────────────────────── */
+        .footer-bar {
+            position: sticky;
+            bottom: 0;
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            padding: 14px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            z-index: 40;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.04);
+        }
+
+        .footer-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .step-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .sdot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--border-dark);
+            transition: all 0.25s;
+        }
+        .sdot.on { background: var(--blue); width: 18px; border-radius: 3px; }
+        .sdot.done { background: var(--green); }
+
+        .status-text {
+            font-size: 12px;
+            color: var(--text-3);
+            font-weight: 500;
+        }
+
+        .status-text.ready { color: var(--green); }
+
+        .footer-actions { display: flex; align-items: center; gap: 10px; }
+
+        /* ─── RESPONSIVE ──────────────────────────────────────────────── */
+        @media (max-width: 960px) {
+            .form-layout { grid-template-columns: 1fr; }
+            .sidebar { transform: translateX(-100%); }
+            .main { margin-left: 0; }
+        }
+
+        @media (max-width: 640px) {
+            .content { padding: 16px; }
+            .tbl-head, .srow { grid-template-columns: 24px 1fr 100px 90px 70px 60px 30px; gap: 6px; }
+        }
+
+        /* ─── ANIMATIONS ──────────────────────────────────────────────── */
+        .fade-in { animation: fadein 0.4s ease both; }
+        @keyframes fadein { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+        .fade-in-2 { animation: fadein 0.4s 0.1s ease both; }
+        .fade-in-3 { animation: fadein 0.4s 0.18s ease both; }
+
+        /* ─── DIVIDER ─────────────────────────────────────────────────── */
+        .divider {
+            height: 1px;
+            background: var(--border);
+            margin: 16px 0;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══ SIDEBAR ══════════════════════════════════════════════════════════ -->
+<aside class="sidebar">
+    <div class="sb-logo">
+        <div class="sb-logo-icon">🍶</div>
+        <span class="sb-logo-name">BarInventory</span>
+        <span class="sb-logo-badge">ADMIN</span>
+    </div>
+
+    <nav class="sb-nav">
+        <div class="sb-section">
+            <div class="sb-section-label">Overview</div>
+            <a href="#" class="sb-item">
+                <span class="sb-icon">▣</span> Dashboard
+            </a>
+            <a href="#" class="sb-item">
+                <span class="sb-icon">📊</span> Reports
+            </a>
+        </div>
+
+        <div class="sb-section">
+            <div class="sb-section-label">Inventory</div>
+            <a href="#" class="sb-item active">
+                <span class="sb-icon">🏷</span> Brands
+                <span class="sb-badge">12</span>
+            </a>
+            <a href="#" class="sb-item">
+                <span class="sb-icon">📦</span> Stock
+            </a>
+            <a href="#" class="sb-item">
+                <span class="sb-icon">📥</span> Purchases
+            </a>
+            <a href="#" class="sb-item">
+                <span class="sb-icon">📤</span> Sales
+            </a>
+        </div>
+
+        <div class="sb-section">
+            <div class="sb-section-label">Management</div>
+            <a href="#" class="sb-item">
+                <span class="sb-icon">🏪</span> Suppliers
+            </a>
+            <a href="#" class="sb-item">
+                <span class="sb-icon">👥</span> Users
+            </a>
+            <a href="#" class="sb-item">
+                <span class="sb-icon">⚙</span> Settings
+            </a>
+        </div>
+    </nav>
+
+    <div class="sb-footer">
+        <div class="sb-user">
+            <div class="sb-avatar">AD</div>
+            <div>
+                <div class="sb-user-name">Admin</div>
+                <div class="sb-user-role">Administrator</div>
+            </div>
+        </div>
+    </div>
+</aside>
+
+<!-- ═══ MAIN ══════════════════════════════════════════════════════════════ -->
+<div class="main">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+        <nav class="topbar-breadcrumb">
+            <a th:href="@{/admin/brands}">Brands</a>
+            <span class="sep">›</span>
+            <a th:href="@{/admin/brands}">Brand List</a>
+            <span class="sep">›</span>
+            <span class="cur">Add New Brand</span>
+        </nav>
+        <div class="topbar-actions">
+            <button class="tb-icon-btn" title="Notifications">🔔</button>
+            <button class="tb-icon-btn" title="Help">?</button>
+        </div>
+    </header>
+
+    <!-- FORM -->
+    <form th:action="@{/admin/brands/new-with-sizes}"
+          method="post"
+          id="bForm"
+          th:object="${brandFormDTO}"
+          novalidate
+          style="display:flex; flex-direction:column; flex:1;">
+
+        <div class="content">
+
+            <!-- Alerts -->
+            <div th:if="${errorMsg}" class="alert alert-error">
+                <span class="alert-icon">⚠</span>
+                <span class="alert-msg" th:text="${errorMsg}"></span>
+            </div>
+            <div th:if="${successMsg}" class="alert alert-success">
+                <span class="alert-icon">✓</span>
+                <span class="alert-msg" th:text="${successMsg}"></span>
+            </div>
+
+            <!-- Page header -->
+            <div class="page-head fade-in">
+                <div>
+                    <h1 class="page-title">Add New Brand</h1>
+                    <p class="page-desc">Fill in brand information and configure available sizes and pricing below.</p>
+                </div>
+                <a th:href="@{/admin/brands}" class="btn btn-secondary">
+                    ← Back to Brands
+                </a>
+            </div>
+
+            <!-- Form layout -->
+            <div class="form-layout">
+
+                <!-- ── LEFT COLUMN: Brand Info ───────────────────────── -->
+                <div style="display:flex; flex-direction:column; gap:16px;">
+
+                    <!-- Brand Details Card -->
+                    <div class="card fade-in-2">
+                        <div class="card-head">
+                            <div class="card-head-icon">📋</div>
+                            <span class="card-title">Brand Information</span>
+                        </div>
+                        <div class="card-body">
+
+                            <div class="field-group">
+                                <label class="field-label" for="bName">
+                                    Brand Name <span class="req">*</span>
+                                </label>
+                                <input type="text"
+                                       class="input"
+                                       id="bName"
+                                       th:field="*{name}"
+                                       placeholder="e.g. Royal Stag"
+                                       autocomplete="off"
+                                       required>
+                                <div class="field-error" id="nameErr">Brand name is required.</div>
+                            </div>
+
+                            <div class="input-row">
+                                <div class="field-group">
+                                    <label class="field-label" for="bPC">Parent Company</label>
+                                    <input type="text"
+                                           class="input"
+                                           id="bPC"
+                                           th:field="*{parentCompany}"
+                                           placeholder="e.g. Pernod Ricard"
+                                           autocomplete="off">
+                                </div>
+                                <div class="field-group">
+                                    <label class="field-label" for="bEC">Excise Code</label>
+                                    <input type="text"
+                                           class="input"
+                                           id="bEC"
+                                           th:field="*{exciseCode}"
+                                           placeholder="e.g. AP-WH-001"
+                                           autocomplete="off">
+                                </div>
+                            </div>
+
+                            <div class="field-group">
+                                <label class="field-label">
+                                    Category <span class="req">*</span>
+                                </label>
+                                <div class="cat-grid" id="catGrid">
+                                    <th:block th:each="cat : ${categories}">
+                                        <label class="cat-btn" th:attr="data-val=${cat}">
+                                            <input type="radio" class="cat-radio"
+                                                   name="category"
+                                                   th:value="${cat}"
+                                                   th:id="'c_'+${cat}"
+                                                   required>
+                                            <span class="emoji"
+                                                  th:text="${cat.name()=='WHISKY' ?'🥃':
+                                                            cat.name()=='BEER'   ?'🍺':
+                                                            cat.name()=='VODKA'  ?'🍸':
+                                                            cat.name()=='RUM'    ?'🍹':
+                                                            cat.name()=='WINE'   ?'🍷':
+                                                            cat.name()=='GIN'    ?'🌿':
+                                                            cat.name()=='BRANDY' ?'🥂':
+                                                            cat.name()=='TEQUILA'?'🌵':'🍶'}">
+                                            </span>
+                                            <span class="name" th:text="${cat}"></span>
+                                        </label>
+                                    </th:block>
+                                </div>
+                                <div class="field-error" id="catErr">Please select a category.</div>
+                            </div>
+
+                            <div class="divider"></div>
+
+                            <div class="status-toggle">
+                                <div class="st-info">
+                                    <span class="st-label">Active Status</span>
+                                    <span class="st-hint">Active brands are visible in inventory</span>
+                                </div>
+                                <label class="sw">
+                                    <input type="checkbox" name="active" value="true" checked>
+                                    <span class="sw-track"></span>
+                                </label>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Live Preview Card -->
+                    <div id="brand-preview" class="card">
+                        <div class="card-head">
+                            <div class="card-head-icon">👁</div>
+                            <span class="card-title">Preview</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="bp-label">Brand Card</div>
+                            <div class="bp-name" id="bp-name">—</div>
+                            <div class="bp-meta" id="bp-meta">No category selected</div>
+                            <div class="bp-chips" id="bp-chips"></div>
+                        </div>
+                    </div>
+
+                </div><!-- /left col -->
+
+                <!-- ── RIGHT COLUMN: Sizes ──────────────────────────── -->
+                <div class="card fade-in-3">
+
+                    <!-- Sizes top bar -->
+                    <div class="sizes-top">
+                        <div class="sizes-top-left">
+                            <div class="card-head-icon" style="margin:0">📐</div>
+                            <span class="card-title">Sizes &amp; Pricing</span>
+                            <span class="count-badge" id="sCnt">0 sizes</span>
+                        </div>
+                        <div class="sizes-top-right">
+                            <button type="button" class="btn btn-outline" onclick="addStdPack()">
+                                ⚡ Standard Pack
+                            </button>
+                            <button type="button" class="btn btn-primary" onclick="addRow()">
+                                + Add Size
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Quick-add row -->
+                    <div class="quick-row">
+                        <span class="quick-lbl">Quick add:</span>
+                        <button type="button" class="qc" onclick="qAdd(60,'GLASS_BOTTLE')">60 ml</button>
+                        <button type="button" class="qc" onclick="qAdd(90,'GLASS_BOTTLE')">90 ml</button>
+                        <button type="button" class="qc" onclick="qAdd(180,'GLASS_BOTTLE')">180 ml</button>
+                        <button type="button" class="qc" onclick="qAdd(375,'GLASS_BOTTLE')">375 ml</button>
+                        <button type="button" class="qc" onclick="qAdd(500,'GLASS_BOTTLE')">500 ml</button>
+                        <button type="button" class="qc" onclick="qAdd(750,'GLASS_BOTTLE')">750 ml</button>
+                        <button type="button" class="qc" onclick="qAdd(1000,'GLASS_BOTTLE')">1 L</button>
+                        <button type="button" class="qc" onclick="qAdd(330,'CAN')">330 ml Can</button>
+                        <button type="button" class="qc" onclick="qAdd(650,'CAN')">650 ml Can</button>
+                        <button type="button" class="qc" onclick="qAdd(500,'PET')">500 ml PET</button>
+                    </div>
+
+                    <!-- Table header (shown when rows exist) -->
+                    <div class="tbl-head" id="tblHdr" style="display:none">
+                        <div class="th">#</div>
+                        <div class="th">Size Label</div>
+                        <div class="th">Packaging</div>
+                        <div class="th">Price (₹)</div>
+                        <div class="th">ABV %</div>
+                        <div class="th">Order</div>
+                        <div class="th"></div>
+                    </div>
+
+                    <!-- Size rows container -->
+                    <div class="srows" id="srows"></div>
+
+                    <!-- Empty state -->
+                    <div class="empty" id="emptyState">
+                        <div class="empty-icon">📦</div>
+                        <div class="empty-title">No sizes configured yet</div>
+                        <div class="empty-desc">Add sizes individually or use Quick Add chips above</div>
+                    </div>
+
+                    <!-- Clear all -->
+                    <div id="clearBar" style="display:none; padding:10px 20px; border-top:1px solid var(--border); text-align:right;">
+                        <button type="button" class="btn btn-danger-ghost" onclick="clearAll()">
+                            🗑 Remove All Sizes
+                        </button>
+                    </div>
+
+                </div><!-- /right card -->
+
+            </div><!-- /form-layout -->
+        </div><!-- /content -->
+
+        <!-- ═══ FOOTER ACTION BAR ═══════════════════════════════════════ -->
+        <div class="footer-bar">
+            <div class="footer-info">
+                <div class="step-dots">
+                    <div class="sdot" id="d1"></div>
+                    <div class="sdot" id="d2"></div>
+                    <div class="sdot" id="d3"></div>
+                </div>
+                <span class="status-text" id="statusTxt">Enter brand name &amp; category to continue</span>
+            </div>
+            <div class="footer-actions">
+                <a th:href="@{/admin/brands}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary btn-primary-lg" id="saveBtn">
+                    💾 &nbsp;Save Brand
+                </button>
+            </div>
+        </div>
+
+    </form>
+</div><!-- /main -->
+
+<!-- ═══ JAVASCRIPT ════════════════════════════════════════════════════════ -->
+<script>
+    const PKGS = /*[[${packagingOptions}]]*/ ['GLASS_BOTTLE', 'PET', 'CAN'];
+    const PKG_LABEL = { GLASS_BOTTLE: 'Glass Bottle', PET: 'PET', CAN: 'Can' };
+
+    let idx = 0;
+
+    function pkgOpts(sel) {
+        return PKGS.map(p =>
+            `<option value="${p}" ${p===sel?'selected':''}>${PKG_LABEL[p]||p}</option>`
+        ).join('');
+    }
+
+    /* ── Add a size row ──────────────────────────────────────── */
+    function addRow(d={}) {
+        const container = document.getElementById('srows');
+        const count = container.querySelectorAll('.srow').length;
+        const i     = idx++;
+        const vol   = d.volume || '';
+        const lbl   = d.sizeLabel || (vol ? vol+'ml' : '');
+        const pkg   = d.packaging || 'GLASS_BOTTLE';
+        const ord   = d.displayOrder || (count + 1);
+
+        const row = document.createElement('div');
+        row.className = 'srow';
+        row.dataset.i = i;
+        row.innerHTML = `
+            <span class="rn">${count+1}</span>
+
+            <input type="text"
+                   name="sizes[${i}].sizeLabel"
+                   class="ti"
+                   placeholder="e.g. 750ml"
+                   value="${lbl}"
+                   required
+                   oninput="syncPreview()">
+
+            <select name="sizes[${i}].packaging" class="ts">
+                ${pkgOpts(pkg)}
+            </select>
+
+            <input type="number"
+                   name="sizes[${i}].price"
+                   class="ti"
+                   placeholder="0.00"
+                   step="0.01"
+                   min="0"
+                   value="${d.price||''}"
+                   required
+                   oninput="syncPreview()">
+
+            <input type="number"
+                   name="sizes[${i}].abvPercent"
+                   class="ti"
+                   placeholder="42.8"
+                   step="0.1"
+                   min="0" max="100"
+                   value="${d.abv||''}">
+
+            <input type="number"
+                   name="sizes[${i}].displayOrder"
+                   class="ti"
+                   value="${ord}"
+                   min="1">
+
+            <button type="button" class="del-row" onclick="delRow(this)" title="Remove">✕</button>
+        `;
+
+        container.appendChild(row);
+        // Focus price if label pre-filled, else focus label
+        const ins = row.querySelectorAll('input');
+        setTimeout(() => (lbl ? ins[2] : ins[0]).focus(), 20);
+
+        syncUI(); syncDots();
+    }
+
+    function qAdd(vol, pkg) { addRow({ volume:vol, sizeLabel:vol+'ml', packaging:pkg }); }
+
+    function addStdPack() {
+        [ {volume:180, sizeLabel:'180ml', packaging:'GLASS_BOTTLE', displayOrder:1},
+          {volume:375, sizeLabel:'375ml', packaging:'GLASS_BOTTLE', displayOrder:2},
+          {volume:750, sizeLabel:'750ml', packaging:'GLASS_BOTTLE', displayOrder:3},
+          {volume:1000,sizeLabel:'1000ml',packaging:'GLASS_BOTTLE', displayOrder:4},
+        ].forEach(s => addRow(s));
+    }
+
+    function delRow(btn) {
+        const row = btn.closest('.srow');
+        row.style.cssText += ';opacity:0;transform:translateX(8px);transition:all .15s';
+        setTimeout(() => { row.remove(); renumber(); syncUI(); syncPreview(); syncDots(); }, 150);
+    }
+
+    function clearAll() {
+        if(!confirm('Remove all sizes?')) return;
+        document.getElementById('srows').innerHTML = '';
+        syncUI(); syncPreview(); syncDots();
+    }
+
+    function renumber() {
+        document.querySelectorAll('#srows .srow').forEach((r,i) =>
+            r.querySelector('.rn').textContent = i+1
+        );
+    }
+
+    /* ── Sync UI elements ────────────────────────────────────── */
+    function syncUI() {
+        const n = document.querySelectorAll('#srows .srow').length;
+        document.getElementById('emptyState').style.display = n ? 'none'  : 'flex';
+        document.getElementById('tblHdr').style.display     = n ? 'grid'  : 'none';
+        document.getElementById('clearBar').style.display   = n ? 'block' : 'none';
+        document.getElementById('sCnt').textContent = n === 0 ? '0 sizes' : `${n} size${n>1?'s':''}`;
+    }
+
+    /* ── Live preview ────────────────────────────────────────── */
+    function syncPreview() {
+        const name  = document.getElementById('bName').value.trim();
+        const catEl = document.querySelector('.cat-btn.active');
+        const pv    = document.getElementById('brand-preview');
+        if(!name) { pv.style.display='none'; return; }
+        pv.style.display = 'block';
+        document.getElementById('bp-name').textContent = name;
+        document.getElementById('bp-meta').textContent = catEl
+            ? catEl.querySelector('.name').textContent
+            : 'No category selected';
+
+        const chips = document.getElementById('bp-chips');
+        chips.innerHTML = '';
+        document.querySelectorAll('#srows .srow').forEach(row => {
+            const lbl   = row.querySelector('input[name$=".sizeLabel"]').value;
+            const price = row.querySelector('input[name$=".price"]').value;
+            if(!lbl) return;
+            const c = document.createElement('span');
+            c.className = 'bp-chip';
+            c.textContent = lbl + (price ? ` · ₹${price}` : '');
+            chips.appendChild(c);
+        });
+    }
+
+    /* ── Step dots & status text ─────────────────────────────── */
+    function syncDots() {
+        const hasN = !!document.getElementById('bName').value.trim();
+        const hasC = !!document.querySelector('.cat-btn.active');
+        const hasS = document.querySelectorAll('#srows .srow').length > 0;
+
+        const set = (id, on, done) => {
+            const el = document.getElementById(id);
+            el.className = 'sdot' + (done?' done': on?' on':'');
+        };
+        set('d1', hasN, hasN && hasC);
+        set('d2', hasC && hasN, hasC && hasN && hasS);
+        set('d3', hasS && hasN && hasC, false);
+
+        const txt = document.getElementById('statusTxt');
+        if(!hasN)           { txt.textContent = 'Enter a brand name to continue'; txt.className = 'status-text'; }
+        else if(!hasC)      { txt.textContent = 'Select a category'; txt.className = 'status-text'; }
+        else if(!hasS)      { txt.textContent = 'Add sizes (optional) — ready to save'; txt.className = 'status-text ready'; }
+        else                { txt.textContent = `Ready to save — ${document.querySelectorAll('#srows .srow').length} size(s) configured`; txt.className = 'status-text ready'; }
+    }
+
+    /* ── Category clicks ─────────────────────────────────────── */
+    document.querySelectorAll('.cat-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            btn.querySelector('.cat-radio').checked = true;
+            document.getElementById('catErr').classList.remove('show');
+            document.querySelectorAll('.cat-btn').forEach(b => b.style.borderColor = '');
+            syncPreview(); syncDots();
+        });
+    });
+
+    /* ── Name input ──────────────────────────────────────────── */
+    document.getElementById('bName').addEventListener('input', function() {
+        this.classList.remove('invalid');
+        document.getElementById('nameErr').classList.remove('show');
+        syncPreview(); syncDots();
+    });
+
+    /* ── Submit validation ───────────────────────────────────── */
+    document.getElementById('bForm').addEventListener('submit', e => {
+        let ok = true;
+        const name = document.getElementById('bName').value.trim();
+        const cat  = document.querySelector('.cat-btn.active');
+
+        if(!name) {
+            document.getElementById('bName').classList.add('invalid');
+            document.getElementById('nameErr').classList.add('show');
+            document.getElementById('bName').focus();
+            ok = false;
+        }
+        if(!cat) {
+            document.getElementById('catErr').classList.add('show');
+            document.querySelectorAll('.cat-btn').forEach(b =>
+                b.style.borderColor = '#fca5a5'
+            );
+            ok = false;
+        }
+
+        if(!ok) { e.preventDefault(); return; }
+
+        const btn = document.getElementById('saveBtn');
+        btn.innerHTML = '⏳ &nbsp;Saving…';
+        btn.disabled = true;
+        btn.style.opacity = '0.75';
+    });
+
+    /* ── Keyboard shortcut ───────────────────────────────────── */
+    document.addEventListener('keydown', e => {
+        if((e.ctrlKey||e.metaKey) && e.key==='Enter') document.getElementById('bForm').requestSubmit();
+    });
+
+    /* ── Init ────────────────────────────────────────────────── */
+    syncUI(); syncDots();
+</script>
+</body>
+</html>
